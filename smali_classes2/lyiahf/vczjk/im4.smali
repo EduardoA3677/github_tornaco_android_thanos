@@ -50,9 +50,9 @@
 
     new-instance v1, Llyiahf/vczjk/cm4;
 
-    const/4 v2, 0x0
+    const/4 v2, 0x1
 
-    const/4 v3, 0x0
+    const-string v3, "PREMIUM"
 
     invoke-direct {v1, v3, v2, v2}, Llyiahf/vczjk/cm4;-><init>(Ljava/lang/String;ZZ)V
 
