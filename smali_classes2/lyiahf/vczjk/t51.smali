@@ -3923,7 +3923,8 @@
 
     iget-boolean v6, v2, Llyiahf/vczjk/cm4;->OooO00o:Z
 
-    if-eqz v6, :cond_11
+    # Modified: Always show paid badge, removed conditional jump
+    # Original: if-eqz v6, :cond_11
 
     sget v6, Lgithub/tornaco/android/thanos/res/R$string;->badge_paid_app:I
 
