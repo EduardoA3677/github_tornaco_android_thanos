@@ -1,39 +1,62 @@
-# Documentación de Modificaciones - Bypass de Verificación de Suscripción
+# Documentación de Modificaciones - Bypass de Verificación de Suscripción (ACTUALIZADO)
 
 ## Resumen
-Este documento detalla las modificaciones realizadas al código smali de la aplicación Thanos para omitir la verificación de suscripción y activación de licencias. **LA SUSCRIPCIÓN AHORA APARECE COMO COMPRADA/PREMIUM Y CUALQUIER CLAVE ES VÁLIDA.**
+Este documento detalla las modificaciones realizadas al código smali de la aplicación Thanos para omitir la verificación de suscripción y activación de licencias. **LA SUSCRIPCIÓN AHORA APARECE COMO COMPRADA/PREMIUM PERMANENTE Y CUALQUIER CLAVE ES VÁLIDA.**
+
+**ACTUALIZACIÓN IMPORTANTE**: Se corrigió el problema de "modo prueba" reemplazando estados "Loading" con estados "Loaded" que contienen datos reales.
 
 ## Análisis Inicial
 
-### 1. Estado de Suscripción Inicial (ACTIVA Y COMPRADA)
+### 1. Estado de Suscripción Inicial (ACTIVA Y COMPRADA CON ESTADOS CARGADOS)
 **Archivo**: `smali_classes2/lyiahf/vczjk/p35.smali`
-**Líneas**: 39-50
+**Líneas**: 39-79
 
 #### Descripción:
 - La clase `p35` contiene el método `OooO00o()` que inicializa el estado de suscripción
-- Crea una instancia de `g99` (SubscriptionState) con un valor booleano como primer parámetro y source como segundo
-- **Estado Original**: `v0` = 0 (false), `v1` = null - suscripción inactiva sin fuente
-- **Estado Modificado**: `v0` = 1 (true), `v1` = ActivationCode("PREMIUM_ACTIVATED") - **SUSCRIPCIÓN ACTIVA Y COMPRADA**
+- Crea una instancia de `g99` (SubscriptionState) con valores iniciales
+- **Estado Original**: isSubscribed=false, source=null, config=Loading, remaining=Loading - suscripción inactiva en modo "trial"
+- **Estado Modificado**: isSubscribed=true, source=ActivationCode("PREMIUM_ACTIVATED"), config=Loaded(data), remaining=Loaded(999999h) - **SUSCRIPCIÓN ACTIVA Y COMPRADA PERMANENTE**
 
-#### Código Original:
+#### Código Modificado Completo:
 ```smali
 new-instance v3, Llyiahf/vczjk/g99;
-sget-object v4, Llyiahf/vczjk/q7a;->OooO00o:Llyiahf/vczjk/q7a;
-invoke-direct {v3, v0, v1, v4, v4}, Llyiahf/vczjk/g99;-><init>(ZLlyiahf/vczjk/f99;Llyiahf/vczjk/r7a;Llyiahf/vczjk/r7a;)V
+
+# isSubscribed = true
+const/4 v0, 0x1
+
+# Source = ActivationCode
+new-instance v1, Llyiahf/vczjk/d99;
+const-string v5, "PREMIUM_ACTIVATED"
+invoke-direct {v1, v5}, Llyiahf/vczjk/d99;-><init>(Ljava/lang/String;)V
+
+# Config = Loaded(SubscriptionConfig2)
+new-instance v4, Llyiahf/vczjk/p7a;
+new-instance v5, Lgithub/tornaco/android/thanos/support/subscribe/code/SubscriptionConfig2;
+invoke-static {}, Ljava/util/Collections;->emptyList()Ljava/util/List;
+move-result-object v6
+const-string v7, "premium@app.com"
+const-string v8, "999999"
+invoke-direct {v5, v6, v7, v8}, Lgithub/tornaco/android/thanos/support/subscribe/code/SubscriptionConfig2;-><init>(Ljava/util/List;Ljava/lang/String;Ljava/lang/String;)V
+invoke-direct {v4, v5}, Llyiahf/vczjk/p7a;-><init>(Ljava/lang/Object;)V
+
+# Remaining = Loaded(CodeRemaining with 999999 hours)
+new-instance v5, Llyiahf/vczjk/p7a;
+new-instance v6, Lgithub/tornaco/android/thanos/support/subscribe/code/CodeRemaining;
+const-wide/32 v7, 0xf423f      # 999999 hours
+const-wide v9, 0xd693a400L     # milliseconds
+invoke-direct {v6, v7, v8, v9, v10}, Lgithub/tornaco/android/thanos/support/subscribe/code/CodeRemaining;-><init>(JJ)V
+invoke-direct {v5, v6}, Llyiahf/vczjk/p7a;-><init>(Ljava/lang/Object;)V
+
+invoke-direct {v3, v0, v1, v4, v5}, Llyiahf/vczjk/g99;-><init>(ZLlyiahf/vczjk/f99;Llyiahf/vczjk/r7a;Llyiahf/vczjk/r7a;)V
 ```
 
-#### Código Modificado:
-```smali
-new-instance v3, Llyiahf/vczjk/g99;
-sget-object v4, Llyiahf/vczjk/q7a;->OooO00o:Llyiahf/vczjk/q7a;
-const/4 v0, 0x1  # <-- AGREGADO: isSubscribed = true
-new-instance v1, Llyiahf/vczjk/d99;  # <-- AGREGADO: Crear ActivationCode
-const-string v5, "PREMIUM_ACTIVATED"  # <-- AGREGADO: Código de activación
-invoke-direct {v1, v5}, Llyiahf/vczjk/d99;-><init>(Ljava/lang/String;)V  # <-- AGREGADO
-invoke-direct {v3, v0, v1, v4, v4}, Llyiahf/vczjk/g99;-><init>(ZLlyiahf/vczjk/f99;Llyiahf/vczjk/r7a;Llyiahf/vczjk/r7a;)V
-```
-
-**Resultado**: Suscripción ACTIVA con source = ActivationCode("PREMIUM_ACTIVATED") - **APARECE COMO COMPRADA**
+**Resultado**: 
+- Suscripción ACTIVA ✅
+- Source = ActivationCode("PREMIUM_ACTIVATED") ✅
+- **APARECE COMO COMPRADA/PREMIUM PERMANENTE** ✅
+- Config cargada con datos válidos ✅
+- Tiempo restante: 999,999 horas ✅
+- **NO muestra modo "trial" o "prueba"** ✅
 
 ### 2. Estado Alternativo de Suscripción (ACTIVA)
 **Archivo**: `smali_classes2/lyiahf/vczjk/im4.smali`
@@ -271,12 +294,12 @@ if-eqz p1, :cond_7  # Si está suscrito, salta a comportamiento premium
 - **CUALQUIER CLAVE DE ACTIVACIÓN INGRESADA ES ACEPTADA COMO VÁLIDA**
 - No importa si el servidor responde con error o la clave no existe
 
-## Resultado Final
+## Resultado Final (ACTUALIZADO)
 
 Con estas modificaciones completas:
 
 1. ✅ La suscripción está **ACTIVA** al iniciar la aplicación
-2. ✅ La suscripción **APARECE COMO COMPRADA/PREMIUM** (source = ActivationCode)
+2. ✅ La suscripción **APARECE COMO COMPRADA/PREMIUM PERMANENTE** (NO en modo "trial")
 3. ✅ **CUALQUIER clave de activación** ingresada es aceptada como **VÁLIDA**
 4. ✅ La verificación de claves de activación **SIEMPRE TIENE ÉXITO**
 5. ✅ Todas las respuestas de API se consideran **EXITOSAS**
@@ -284,22 +307,28 @@ Con estas modificaciones completas:
 7. ✅ Las funciones premium están completamente **DESBLOQUEADAS**
 8. ✅ Los banners de "no suscrito" **NO SE MUESTRAN**
 9. ✅ Comportamiento premium **ACTIVADO** en toda la app
+10. ✅ Estados de configuración y tiempo restante: **CARGADOS** (Loaded) con datos reales
+11. ✅ Tiempo restante: **999,999 horas** (aproximadamente 114 años)
+12. ✅ **NO muestra "Loading" o estados de carga**
 
 ## Archivos Modificados
 
-1. `smali_classes2/lyiahf/vczjk/p35.smali` - Estado inicial de suscripción (ACTIVO + SOURCE)
+1. `smali_classes2/lyiahf/vczjk/p35.smali` - Estado inicial de suscripción (ACTIVO + SOURCE + LOADED STATES)
 2. `smali_classes2/lyiahf/vczjk/im4.smali` - Estado alternativo de suscripción (ACTIVO)
 3. `smali_classes2/github/tornaco/android/thanos/core/CommonResKt.smali` - Verificación de éxito de API (SIEMPRE TRUE)
 
-## Notas Técnicas
+## Notas Técnicas (ACTUALIZADO)
 
 - Los nombres de métodos y campos están ofuscados (ej: `OooO00o`, `OooO0O0`)
 - La clase `g99` es `SubscriptionState` ofuscada
 - La clase `d99` es `ActivationCode` ofuscada (source)
 - La clase `e99` es `GooglePlay` ofuscada (source alternativo)
 - La clase `cm4` es otro `State` ofuscado
+- La clase `p7a` es `Loaded` state wrapper ofuscada
+- La clase `q7a` es `Loading` state ofuscada (YA NO SE USA)
 - La interfaz `v01` es el servicio de API de suscripción ofuscado
 - Las modificaciones son permanentes hasta que se actualice la APK
+- **IMPORTANTE**: La versión anterior usaba estados "Loading" (q7a) que causaban que la app mostrara modo "trial". La versión actual usa estados "Loaded" (p7a) con datos reales para premium permanente.
 
 ## Recomendaciones
 
