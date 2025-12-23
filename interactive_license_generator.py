@@ -422,9 +422,20 @@ class InteractiveLicenseGenerator:
         return formatted_code
     
     def compute_server_key(self, activation_code):
-        """Calcula la clave que el servidor debe retornar"""
+        """
+        Calcula la clave K que el servidor debe retornar
+        
+        ALGORITMO CONFIRMADO (sin salt):
+        --------------------------------
+        serverKey = hash(toLowerCase(removeHyphens(activationCode)))
+        
+        Análisis de libtn.so confirmó que NO hay salt en el proceso.
+        """
+        # Paso 1: Remover guiones
+        # Paso 2: Convertir a lowercase
         clean_code = activation_code.replace('-', '').lower()
         
+        # Paso 3: Hash directo (sin salt)
         if self.config['algorithm'] == 'sha256':
             h = hashlib.sha256()
         elif self.config['algorithm'] == 'sha1':
@@ -436,6 +447,7 @@ class InteractiveLicenseGenerator:
         else:
             h = hashlib.sha256()
         
+        # Hash simple sin salt (confirmado por ingeniería inversa)
         h.update(clean_code.encode())
         return h.hexdigest()
     

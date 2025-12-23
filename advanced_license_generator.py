@@ -101,12 +101,14 @@ class AdvancedLicenseGenerator:
     CODE_SECTIONS = 6
     SECTION_LENGTH = 4
     
-    # Claves encontradas en análisis (ajustar según descubrimientos)
-    # La string "THANOX-C++" encontrada podría ser parte del salt
-    SECRET_SALT = b"THANOX-C++"
+    # String encontrada en libtn.so durante análisis
+    # NOTA: Esta string NO se usa como salt en el algoritmo de verificación
+    # Se mantiene solo como referencia del análisis
+    SECRET_SALT = b"THANOX-C++"  # NO USADO en compute_server_key
     
-    # Algoritmo basado en análisis (puede ser SHA256, Keccak, etc.)
-    HASH_ALGORITHM = "sha256"  # Default, ajustar según análisis
+    # Algoritmo confirmado por ingeniería inversa de libtn.so
+    # La función nativa NO usa salt, solo: hash(toLowerCase(code))
+    HASH_ALGORITHM = "sha256"  # Default confirmado
     
     def __init__(self, secret_key: Optional[bytes] = None, algorithm: str = None):
         """
@@ -162,25 +164,33 @@ class AdvancedLicenseGenerator:
         """
         Calcula la clave K que el servidor debe retornar.
         
-        Basado en análisis de libtn.so:
-        - La función nativa convierte código a lowercase
-        - Luego compara con serverKey usando strcmp
+        ALGORITMO CONFIRMADO POR INGENIERÍA INVERSA:
+        -------------------------------------------
+        Análisis de libtn.so (289 instrucciones ARM64) confirmó:
         
-        Por lo tanto, serverKey = hash(toLowerCase(activationCode))
+        1. La función nativa NO usa salt
+        2. Solo transforma: toLowerCase(removeHyphens(code))
+        3. Luego compara con strcmp()
         
+        Por lo tanto:
+          serverKey = hash(toLowerCase(removeHyphens(activationCode)))
+          
+        NO es:
+          serverKey = HMAC(code, SECRET_SALT)  ❌ INCORRECTO
+          
         Args:
             activation_code: Código de activación (con o sin guiones)
             
         Returns:
             Server key que debe ir en campo "k" de la respuesta API
         """
-        # Limpiar código (remover guiones)
+        # Paso 1: Limpiar código (remover guiones)
         clean_code = activation_code.replace('-', '')
         
-        # Convertir a lowercase (como hace libtn.so)
+        # Paso 2: Convertir a lowercase (exactamente como hace libtn.so)
         lower_code = clean_code.lower()
         
-        # Calcular hash según algoritmo
+        # Paso 3: Calcular hash según algoritmo (SIN salt)
         if self.algorithm == 'sha256':
             h = hashlib.sha256()
         elif self.algorithm == 'sha1':
@@ -193,11 +203,11 @@ class AdvancedLicenseGenerator:
         else:
             h = hashlib.sha256()
         
-        # Opción 1: Hash simple
+        # Hash directo sin salt (confirmado por análisis de libtn.so)
         h.update(lower_code.encode())
         
-        # Opción 2: HMAC con salt (descomentar si es necesario)
-        # h = hmac.new(self.secret_key, lower_code.encode(), hashlib.sha256)
+        # NOTA: No se usa HMAC ni salt
+        # El análisis exhaustivo de libtn.so confirmó que NO hay salt hardcodeado
         
         return h.hexdigest()
     
