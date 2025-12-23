@@ -1,0 +1,23 @@
+{
+  "activationCode": {
+    "code": "4C05-2478-2C09-80FB-7A7F-AA35",
+    "serverKey": "384449014b896189c1f7cefd4b99acb5e8a650e12b422e46a79330b719066f59",
+    "flavor": "monthly",
+    "durationDays": 30,
+    "createdAt": "2025-12-23T15:32:20.150928",
+    "expiresAt": "2026-01-22T15:32:20.150928",
+    "algorithm": "sha256"
+  },
+  "deviceInfo": {
+    "uuid": "d0fa534b-7a82-4a62-8bba-940996c8da39",
+    "deviceId": "a84ac32ddfe990d6",
+    "deviceModel": "SM-G950F",
+    "osName": "QP1A.190711.020",
+    "osVersion": 29
+  },
+  "apiResponse": {
+    "result": 0,
+    "k": "384449014b896189c1f7cefd4b99acb5e8a650e12b422e46a79330b719066f59",
+    "msg": "{\"remainingHours\": 720, \"remainingMillis\": 2592000000}"
+  }
+}
