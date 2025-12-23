@@ -285,18 +285,23 @@ class AdvancedLicenseGenerator:
         activation_code: ActivationCode
     ) -> Dict:
         """
-        Genera respuesta completa de API que pasaría verificación nativa
+        Genera respuesta en formato servidor real
         
         Returns:
-            Dict compatible con CommonApiResWrapper
+            Dict compatible con CommonApiResWrapper (formato servidor)
         """
         return {
-            "result": 0,  # 0 = success
-            "k": activation_code.server_key,  # ⭐ Clave para verificación nativa
+            "result": 0,  # 0 = success, 1 = error
             "msg": json.dumps({
                 "remainingHours": activation_code.duration_days * 24,
                 "remainingMillis": activation_code.duration_days * 24 * 3600 * 1000
-            })
+            }),
+            "k": activation_code.server_key,  # ⭐ Clave para verificación nativa
+            "i": None,
+            "j": None,
+            "l": None,
+            "m": None,
+            "n": None
         }
     
     def bind_device(
@@ -410,16 +415,59 @@ def main():
         print(f"  Model:  {device.device_model}")
         print(f"  OS:     {device.os_name}")
         
-        # Guardar
-        filename = f"activation_{flavor_key}_{int(code.created_at.timestamp())}_advanced.json"
-        with open(filename, 'w', encoding='utf-8') as f:
-            json.dump({
-                'activation_code': code.to_dict(),
-                'api_response': api_response,
-                'binding': binding
-            }, f, indent=2, ensure_ascii=False)
+        # Guardar en dos archivos separados
+        timestamp_str = int(code.created_at.timestamp())
         
-        print(f"\nGuardado en: {filename}")
+        # Archivo JSON solo con respuesta del servidor
+        json_filename = f"activation_{flavor_key}_{timestamp_str}_server_response.json"
+        with open(json_filename, 'w', encoding='utf-8') as f:
+            json.dump(api_response, f, indent=2, ensure_ascii=False)
+        
+        # Archivo TXT con información completa
+        txt_filename = f"activation_{flavor_key}_{timestamp_str}_info.txt"
+        with open(txt_filename, 'w', encoding='utf-8') as f:
+            f.write("=" * 80 + "\n")
+            f.write("INFORMACIÓN DE LICENCIA GENERADA\n")
+            f.write("=" * 80 + "\n\n")
+            
+            f.write("CÓDIGO DE ACTIVACIÓN:\n")
+            f.write(f"  {code.code}\n\n")
+            
+            f.write("SERVER KEY (para campo 'k'):\n")
+            f.write(f"  {code.server_key}\n\n")
+            
+            f.write("TIPO DE SUSCRIPCIÓN:\n")
+            f.write(f"  Flavor: {flavor_obj.text}\n")
+            f.write(f"  Descripción: {flavor_obj.description}\n")
+            f.write(f"  Precio: ${flavor_obj.price_usd} USD / ¥{flavor_obj.price_cny} CNY\n")
+            f.write(f"  Duración: {code.duration_days} días\n\n")
+            
+            f.write("FECHAS:\n")
+            f.write(f"  Creado: {code.created_at.strftime('%Y-%m-%d %H:%M:%S')}\n")
+            f.write(f"  Expira: {code.expires_at.strftime('%Y-%m-%d %H:%M:%S')}\n\n")
+            
+            f.write("INFORMACIÓN DEL DISPOSITIVO:\n")
+            f.write(f"  UUID:        {device.uuid}\n")
+            f.write(f"  Device ID:   {device.device_id}\n")
+            f.write(f"  Modelo:      {device.device_model}\n")
+            f.write(f"  Build ID:    {device.os_name}\n")
+            f.write(f"  API Level:   {device.os_version}\n\n")
+            
+            f.write("BINDING INFO:\n")
+            f.write(f"  Estado: {'✓ Exitosa' if binding['success'] else '✗ Fallida'}\n")
+            f.write(f"  isSubscribed: {binding['subscription']['isSubscribed']}\n")
+            f.write(f"  Horas Restantes: {binding['subscription']['remainingHours']:,}\n")
+            f.write(f"  Verificación Nativa: {'✓ PASARÍA' if binding['nativeVerification']['willPass'] else '✗ FALLARÍA'}\n\n")
+            
+            f.write("=" * 80 + "\n")
+            f.write("RESPUESTA DEL SERVIDOR (guardada en JSON):\n")
+            f.write("=" * 80 + "\n")
+            f.write(json.dumps(api_response, indent=2, ensure_ascii=False))
+            f.write("\n")
+        
+        print(f"\n💾 Archivos guardados:")
+        print(f"   JSON: {json_filename}")
+        print(f"   TXT:  {txt_filename}")
     
     print("\n" + "=" * 80)
     print("NOTAS IMPORTANTES:")

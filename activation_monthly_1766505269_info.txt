@@ -1,0 +1,46 @@
+================================================================================
+INFORMACIÓN DE LICENCIA GENERADA
+================================================================================
+
+CÓDIGO DE ACTIVACIÓN:
+  09EC-562D-185D-EB45-133E-086E
+
+SERVER KEY (para campo 'k'):
+  bf1193d2a3ced9633a89be32ba95e71724d036f4a77952679dc75b6b5bda0c46
+
+TIPO DE SUSCRIPCIÓN:
+  Flavor: Monthly
+  Descripción: Suscripción Mensual
+  Precio: $2.99 USD / ¥19.99 CNY
+  Duración: 30 días
+
+FECHAS:
+  Creado: 2025-12-23 15:54:29
+  Expira: 2026-01-22 15:54:29
+
+INFORMACIÓN DEL DISPOSITIVO:
+  UUID:        aacf7035-e785-46ac-a684-4a64dcd572fe
+  Device ID:   0c6b0d6d15bcb3d7
+  Modelo:      SM-G950F
+  Build ID:    QP1A.190711.020
+  API Level:   29
+
+BINDING INFO:
+  Estado: ✓ Exitosa
+  isSubscribed: True
+  Horas Restantes: 720
+  Verificación Nativa: ✓ PASARÍA
+
+================================================================================
+RESPUESTA DEL SERVIDOR (guardada en JSON):
+================================================================================
+{
+  "result": 0,
+  "msg": "{\"remainingHours\": 720, \"remainingMillis\": 2592000000}",
+  "k": "bf1193d2a3ced9633a89be32ba95e71724d036f4a77952679dc75b6b5bda0c46",
+  "i": null,
+  "j": null,
+  "l": null,
+  "m": null,
+  "n": null
+}

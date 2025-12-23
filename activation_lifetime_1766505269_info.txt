@@ -1,0 +1,46 @@
+================================================================================
+INFORMACIÓN DE LICENCIA GENERADA
+================================================================================
+
+CÓDIGO DE ACTIVACIÓN:
+  7B4A-32C8-ED66-197D-DD0A-3FE9
+
+SERVER KEY (para campo 'k'):
+  30b2ada6e97fd23e763cd2c619645f6e55bb641aa1c2b2c68c8c2f3fecdf266b
+
+TIPO DE SUSCRIPCIÓN:
+  Flavor: Lifetime
+  Descripción: Licencia Permanente
+  Precio: $49.99 USD / ¥328.0 CNY
+  Duración: 36500 días
+
+FECHAS:
+  Creado: 2025-12-23 15:54:29
+  Expira: 2125-11-29 15:54:29
+
+INFORMACIÓN DEL DISPOSITIVO:
+  UUID:        66890ff5-36b4-4476-92b4-d6b767f5947a
+  Device ID:   209e16cfe727dede
+  Modelo:      SM-G950F
+  Build ID:    QP1A.190711.020
+  API Level:   29
+
+BINDING INFO:
+  Estado: ✓ Exitosa
+  isSubscribed: True
+  Horas Restantes: 876,000
+  Verificación Nativa: ✓ PASARÍA
+
+================================================================================
+RESPUESTA DEL SERVIDOR (guardada en JSON):
+================================================================================
+{
+  "result": 0,
+  "msg": "{\"remainingHours\": 876000, \"remainingMillis\": 3153600000000}",
+  "k": "30b2ada6e97fd23e763cd2c619645f6e55bb641aa1c2b2c68c8c2f3fecdf266b",
+  "i": null,
+  "j": null,
+  "l": null,
+  "m": null,
+  "n": null
+}

@@ -467,7 +467,24 @@ class InteractiveLicenseGenerator:
         print(f"   Hash:        {self.config['algorithm'].upper()}")
     
     def generate_api_response(self, activation_code, server_key):
-        """Genera respuesta de API completa"""
+        """Genera respuesta de API en formato servidor"""
+        # Formato de respuesta del servidor (éxito)
+        return {
+            "result": 0,
+            "msg": json.dumps({
+                "remainingHours": self.config['duration_days'] * 24,
+                "remainingMillis": self.config['duration_days'] * 24 * 3600 * 1000
+            }),
+            "k": server_key,
+            "i": None,
+            "j": None,
+            "l": None,
+            "m": None,
+            "n": None
+        }
+    
+    def generate_info_data(self, activation_code, server_key):
+        """Genera información completa del código (para archivo TXT)"""
         now = datetime.now()
         
         return {
@@ -486,29 +503,58 @@ class InteractiveLicenseGenerator:
                 "deviceModel": self.config['device_model'],
                 "osName": self.config['os_name'],
                 "osVersion": self.config['os_version']
-            },
-            "apiResponse": {
-                "result": 0,
-                "k": server_key,
-                "msg": json.dumps({
-                    "remainingHours": self.config['duration_days'] * 24,
-                    "remainingMillis": self.config['duration_days'] * 24 * 3600 * 1000
-                })
             }
         }
     
-    def save_to_file(self, data, activation_code):
-        """Guarda resultados en archivo JSON"""
+    def save_to_file(self, api_response, info_data, activation_code):
+        """Guarda resultados en archivos separados (JSON para API, TXT para info)"""
         timestamp = int(datetime.now().timestamp())
-        filename = f"license_{self.config['flavor']}_{timestamp}_custom.json"
         
-        with open(filename, 'w', encoding='utf-8') as f:
-            json.dump(data, f, indent=2, ensure_ascii=False)
+        # Archivo JSON solo con respuesta del servidor
+        json_filename = f"license_{self.config['flavor']}_{timestamp}_server_response.json"
+        with open(json_filename, 'w', encoding='utf-8') as f:
+            json.dump(api_response, f, indent=2, ensure_ascii=False)
         
-        print(f"\n💾 GUARDADO EN ARCHIVO:")
-        print(f"   {os.path.abspath(filename)}")
+        # Archivo TXT con información completa
+        txt_filename = f"license_{self.config['flavor']}_{timestamp}_info.txt"
+        with open(txt_filename, 'w', encoding='utf-8') as f:
+            f.write("=" * 70 + "\n")
+            f.write("INFORMACIÓN DE LICENCIA GENERADA\n")
+            f.write("=" * 70 + "\n\n")
+            
+            f.write("CÓDIGO DE ACTIVACIÓN:\n")
+            f.write(f"  {info_data['activationCode']['code']}\n\n")
+            
+            f.write("SERVER KEY (para campo 'k'):\n")
+            f.write(f"  {info_data['activationCode']['serverKey']}\n\n")
+            
+            f.write("TIPO DE SUSCRIPCIÓN:\n")
+            f.write(f"  Flavor: {info_data['activationCode']['flavor']}\n")
+            f.write(f"  Duración: {info_data['activationCode']['durationDays']} días\n")
+            f.write(f"  Algoritmo: {info_data['activationCode']['algorithm']}\n\n")
+            
+            f.write("FECHAS:\n")
+            f.write(f"  Creado: {info_data['activationCode']['createdAt']}\n")
+            f.write(f"  Expira: {info_data['activationCode']['expiresAt']}\n\n")
+            
+            f.write("INFORMACIÓN DEL DISPOSITIVO:\n")
+            f.write(f"  UUID:        {info_data['deviceInfo']['uuid']}\n")
+            f.write(f"  Device ID:   {info_data['deviceInfo']['deviceId']}\n")
+            f.write(f"  Modelo:      {info_data['deviceInfo']['deviceModel']}\n")
+            f.write(f"  Build ID:    {info_data['deviceInfo']['osName']}\n")
+            f.write(f"  API Level:   {info_data['deviceInfo']['osVersion']}\n\n")
+            
+            f.write("=" * 70 + "\n")
+            f.write("RESPUESTA DEL SERVIDOR (guardada en JSON):\n")
+            f.write("=" * 70 + "\n")
+            f.write(json.dumps(api_response, indent=2, ensure_ascii=False))
+            f.write("\n")
         
-        return filename
+        print(f"\n💾 ARCHIVOS GUARDADOS:")
+        print(f"   JSON (respuesta servidor): {os.path.abspath(json_filename)}")
+        print(f"   TXT  (información):        {os.path.abspath(txt_filename)}")
+        
+        return json_filename, txt_filename
     
     def run(self):
         """Ejecuta el generador interactivo"""
@@ -531,8 +577,9 @@ class InteractiveLicenseGenerator:
         self.display_results(activation_code, server_key)
         
         # Guardar
-        data = self.generate_api_response(activation_code, server_key)
-        filename = self.save_to_file(data, activation_code)
+        api_response = self.generate_api_response(activation_code, server_key)
+        info_data = self.generate_info_data(activation_code, server_key)
+        json_file, txt_file = self.save_to_file(api_response, info_data, activation_code)
         
         # Finalizar
         print("\n" + "=" * 70)

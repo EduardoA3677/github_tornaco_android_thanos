@@ -1,0 +1,39 @@
+======================================================================
+INFORMACIÓN DE LICENCIA GENERADA
+======================================================================
+
+CÓDIGO DE ACTIVACIÓN:
+  9346-3631-F3C6-2512-26FD-F062
+
+SERVER KEY (para campo 'k'):
+  030f002bc26b839a883cf90fd0f4ce1eca4b761afb865264668da65bd2845471
+
+TIPO DE SUSCRIPCIÓN:
+  Flavor: monthly
+  Duración: 30 días
+  Algoritmo: sha256
+
+FECHAS:
+  Creado: 2025-12-23T15:53:57.501385
+  Expira: 2026-01-22T15:53:57.501385
+
+INFORMACIÓN DEL DISPOSITIVO:
+  UUID:        604a269b-21b4-41ba-9b96-591d2fd045d1
+  Device ID:   bcbd50dadbd3fb30
+  Modelo:      SM-G950F
+  Build ID:    QP1A.190711.020
+  API Level:   29
+
+======================================================================
+RESPUESTA DEL SERVIDOR (guardada en JSON):
+======================================================================
+{
+  "result": 0,
+  "msg": "{\"remainingHours\": 720, \"remainingMillis\": 2592000000}",
+  "k": "030f002bc26b839a883cf90fd0f4ce1eca4b761afb865264668da65bd2845471",
+  "i": null,
+  "j": null,
+  "l": null,
+  "m": null,
+  "n": null
+}
