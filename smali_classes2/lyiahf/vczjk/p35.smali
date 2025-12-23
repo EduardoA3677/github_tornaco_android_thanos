@@ -38,8 +38,6 @@
 
     new-instance v3, Llyiahf/vczjk/g99;
 
-    sget-object v4, Llyiahf/vczjk/q7a;->OooO00o:Llyiahf/vczjk/q7a;
-
     const/4 v0, 0x1
 
     new-instance v1, Llyiahf/vczjk/d99;
@@ -48,7 +46,35 @@
 
     invoke-direct {v1, v5}, Llyiahf/vczjk/d99;-><init>(Ljava/lang/String;)V
 
-    invoke-direct {v3, v0, v1, v4, v4}, Llyiahf/vczjk/g99;-><init>(ZLlyiahf/vczjk/f99;Llyiahf/vczjk/r7a;Llyiahf/vczjk/r7a;)V
+    new-instance v4, Llyiahf/vczjk/p7a;
+
+    new-instance v5, Lgithub/tornaco/android/thanos/support/subscribe/code/SubscriptionConfig2;
+
+    invoke-static {}, Ljava/util/Collections;->emptyList()Ljava/util/List;
+
+    move-result-object v6
+
+    const-string v7, "premium@app.com"
+
+    const-string v8, "999999"
+
+    invoke-direct {v5, v6, v7, v8}, Lgithub/tornaco/android/thanos/support/subscribe/code/SubscriptionConfig2;-><init>(Ljava/util/List;Ljava/lang/String;Ljava/lang/String;)V
+
+    invoke-direct {v4, v5}, Llyiahf/vczjk/p7a;-><init>(Ljava/lang/Object;)V
+
+    new-instance v5, Llyiahf/vczjk/p7a;
+
+    new-instance v6, Lgithub/tornaco/android/thanos/support/subscribe/code/CodeRemaining;
+
+    const-wide/32 v7, 0xf423f
+
+    const-wide v9, 0xd693a400L
+
+    invoke-direct {v6, v7, v8, v9, v10}, Lgithub/tornaco/android/thanos/support/subscribe/code/CodeRemaining;-><init>(JJ)V
+
+    invoke-direct {v5, v6}, Llyiahf/vczjk/p7a;-><init>(Ljava/lang/Object;)V
+
+    invoke-direct {v3, v0, v1, v4, v5}, Llyiahf/vczjk/g99;-><init>(ZLlyiahf/vczjk/f99;Llyiahf/vczjk/r7a;Llyiahf/vczjk/r7a;)V
 
     return-object v3
 
