@@ -1,0 +1,31 @@
+.class public abstract Llyiahf/vczjk/wu2;
+.super Ljava/lang/Object;
+.source "SourceFile"
+
+
+# static fields
+.field public static final OooO00o:F
+
+.field public static final OooO0O0:Llyiahf/vczjk/dk8;
+
+.field public static final OooO0OO:F
+
+
+# direct methods
+.method static constructor <clinit>()V
+    .locals 2
+
+    const-wide/high16 v0, 0x404c000000000000L    # 56.0
+
+    double-to-float v0, v0
+
+    sput v0, Llyiahf/vczjk/wu2;->OooO00o:F
+
+    sget-object v1, Llyiahf/vczjk/dk8;->OooOOo:Llyiahf/vczjk/dk8;
+
+    sput-object v1, Llyiahf/vczjk/wu2;->OooO0O0:Llyiahf/vczjk/dk8;
+
+    sput v0, Llyiahf/vczjk/wu2;->OooO0OO:F
+
+    return-void
+.end method
