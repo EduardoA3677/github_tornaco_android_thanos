@@ -42,6 +42,12 @@
 
     const/4 v0, 0x1
 
+    new-instance v1, Llyiahf/vczjk/d99;
+
+    const-string v5, "PREMIUM_ACTIVATED"
+
+    invoke-direct {v1, v5}, Llyiahf/vczjk/d99;-><init>(Ljava/lang/String;)V
+
     invoke-direct {v3, v0, v1, v4, v4}, Llyiahf/vczjk/g99;-><init>(ZLlyiahf/vczjk/f99;Llyiahf/vczjk/r7a;Llyiahf/vczjk/r7a;)V
 
     return-object v3
