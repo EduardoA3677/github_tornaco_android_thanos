@@ -469,18 +469,20 @@ class InteractiveLicenseGenerator:
     def generate_api_response(self, activation_code, server_key):
         """Genera respuesta de API en formato servidor"""
         # Formato de respuesta del servidor (éxito)
+        # msg debe ser string JSON compacto sin escapes adicionales
+        msg_data = {
+            "remainingHours": self.config['duration_days'] * 24,
+            "remainingMillis": self.config['duration_days'] * 24 * 3600 * 1000
+        }
+        
         return {
             "result": 0,
-            "msg": json.dumps({
-                "remainingHours": self.config['duration_days'] * 24,
-                "remainingMillis": self.config['duration_days'] * 24 * 3600 * 1000
-            }),
+            "msg": json.dumps(msg_data, separators=(',', ':'), ensure_ascii=False),
             "k": server_key,
             "i": None,
             "j": None,
             "l": None,
-            "m": None,
-            "n": None
+            "m": None
         }
     
     def generate_info_data(self, activation_code, server_key):
@@ -510,10 +512,10 @@ class InteractiveLicenseGenerator:
         """Guarda resultados en archivos separados (JSON para API, TXT para info)"""
         timestamp = int(datetime.now().timestamp())
         
-        # Archivo JSON solo con respuesta del servidor
+        # Archivo JSON solo con respuesta del servidor (compacto, sin saltos de línea)
         json_filename = f"license_{self.config['flavor']}_{timestamp}_server_response.json"
         with open(json_filename, 'w', encoding='utf-8') as f:
-            json.dump(api_response, f, indent=2, ensure_ascii=False)
+            json.dump(api_response, f, separators=(',', ':'), ensure_ascii=False)
         
         # Archivo TXT con información completa
         txt_filename = f"license_{self.config['flavor']}_{timestamp}_info.txt"
@@ -547,7 +549,7 @@ class InteractiveLicenseGenerator:
             f.write("=" * 70 + "\n")
             f.write("RESPUESTA DEL SERVIDOR (guardada en JSON):\n")
             f.write("=" * 70 + "\n")
-            f.write(json.dumps(api_response, indent=2, ensure_ascii=False))
+            f.write(json.dumps(api_response, separators=(',', ':'), ensure_ascii=False))
             f.write("\n")
         
         print(f"\n💾 ARCHIVOS GUARDADOS:")

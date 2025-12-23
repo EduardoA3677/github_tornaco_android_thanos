@@ -3,10 +3,10 @@ INFORMACIÓN DE LICENCIA GENERADA
 ================================================================================
 
 CÓDIGO DE ACTIVACIÓN:
-  7B4A-32C8-ED66-197D-DD0A-3FE9
+  E1CE-8A43-95EB-FE21-E78E-642F
 
 SERVER KEY (para campo 'k'):
-  30b2ada6e97fd23e763cd2c619645f6e55bb641aa1c2b2c68c8c2f3fecdf266b
+  a2e2b64022382c845462fee9374e2bd127f587ecb5ba6b4a947d9672678705ab
 
 TIPO DE SUSCRIPCIÓN:
   Flavor: Lifetime
@@ -15,12 +15,12 @@ TIPO DE SUSCRIPCIÓN:
   Duración: 36500 días
 
 FECHAS:
-  Creado: 2025-12-23 15:54:29
-  Expira: 2125-11-29 15:54:29
+  Creado: 2025-12-23 15:58:24
+  Expira: 2125-11-29 15:58:24
 
 INFORMACIÓN DEL DISPOSITIVO:
-  UUID:        66890ff5-36b4-4476-92b4-d6b767f5947a
-  Device ID:   209e16cfe727dede
+  UUID:        8f697cb7-21ff-4fe8-a77c-4e6c610c6451
+  Device ID:   d29fc42b50735afa
   Modelo:      SM-G950F
   Build ID:    QP1A.190711.020
   API Level:   29
@@ -34,13 +34,4 @@ BINDING INFO:
 ================================================================================
 RESPUESTA DEL SERVIDOR (guardada en JSON):
 ================================================================================
-{
-  "result": 0,
-  "msg": "{\"remainingHours\": 876000, \"remainingMillis\": 3153600000000}",
-  "k": "30b2ada6e97fd23e763cd2c619645f6e55bb641aa1c2b2c68c8c2f3fecdf266b",
-  "i": null,
-  "j": null,
-  "l": null,
-  "m": null,
-  "n": null
-}
+{"result":0,"msg":"{\"remainingHours\":876000,\"remainingMillis\":3153600000000}","k":"a2e2b64022382c845462fee9374e2bd127f587ecb5ba6b4a947d9672678705ab","i":null,"j":null,"l":null,"m":null}

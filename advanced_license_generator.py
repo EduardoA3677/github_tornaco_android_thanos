@@ -290,18 +290,19 @@ class AdvancedLicenseGenerator:
         Returns:
             Dict compatible con CommonApiResWrapper (formato servidor)
         """
+        msg_data = {
+            "remainingHours": activation_code.duration_days * 24,
+            "remainingMillis": activation_code.duration_days * 24 * 3600 * 1000
+        }
+        
         return {
             "result": 0,  # 0 = success, 1 = error
-            "msg": json.dumps({
-                "remainingHours": activation_code.duration_days * 24,
-                "remainingMillis": activation_code.duration_days * 24 * 3600 * 1000
-            }),
+            "msg": json.dumps(msg_data, separators=(',', ':'), ensure_ascii=False),
             "k": activation_code.server_key,  # ⭐ Clave para verificación nativa
             "i": None,
             "j": None,
             "l": None,
-            "m": None,
-            "n": None
+            "m": None
         }
     
     def bind_device(
@@ -418,10 +419,10 @@ def main():
         # Guardar en dos archivos separados
         timestamp_str = int(code.created_at.timestamp())
         
-        # Archivo JSON solo con respuesta del servidor
+        # Archivo JSON solo con respuesta del servidor (compacto, sin saltos de línea)
         json_filename = f"activation_{flavor_key}_{timestamp_str}_server_response.json"
         with open(json_filename, 'w', encoding='utf-8') as f:
-            json.dump(api_response, f, indent=2, ensure_ascii=False)
+            json.dump(api_response, f, separators=(',', ':'), ensure_ascii=False)
         
         # Archivo TXT con información completa
         txt_filename = f"activation_{flavor_key}_{timestamp_str}_info.txt"
@@ -462,7 +463,7 @@ def main():
             f.write("=" * 80 + "\n")
             f.write("RESPUESTA DEL SERVIDOR (guardada en JSON):\n")
             f.write("=" * 80 + "\n")
-            f.write(json.dumps(api_response, indent=2, ensure_ascii=False))
+            f.write(json.dumps(api_response, separators=(',', ':'), ensure_ascii=False))
             f.write("\n")
         
         print(f"\n💾 Archivos guardados:")
