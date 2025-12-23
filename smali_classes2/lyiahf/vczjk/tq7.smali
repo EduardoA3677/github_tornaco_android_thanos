@@ -105,163 +105,25 @@
     :cond_2
     invoke-static {p2}, Llyiahf/vczjk/rl6;->OooOoo0(Ljava/lang/Object;)V
 
+    :goto_1
     :try_start_1
     sget-object p2, Llyiahf/vczjk/uq7;->OooO0O0:Lgithub/tornaco/android/thanos/support/subscribe/code/CodeRemaining;
 
     if-nez p2, :cond_8
 
-    iget-object p2, p0, Llyiahf/vczjk/tq7;->OooO00o:Landroid/content/Context;
+    new-instance p2, Lgithub/tornaco/android/thanos/support/subscribe/code/CodeRemaining;
 
-    const-string v2, "context"
+    const-wide/32 v0, 0xf423f
 
-    invoke-static {p2, v2}, Llyiahf/vczjk/v34;->OooOoO(Ljava/lang/Object;Ljava/lang/String;)V
+    const-wide v2, 0xd693a400L
 
-    new-instance p2, Llyiahf/vczjk/pb7;
-
-    const/4 v2, 0x1
-
-    invoke-direct {p2, v2}, Llyiahf/vczjk/pb7;-><init>(I)V
-
-    const-string v2, "http://thanox.emui.tech/api/"
-
-    invoke-virtual {p2, v2}, Llyiahf/vczjk/pb7;->OooO(Ljava/lang/String;)V
-
-    invoke-static {}, Llyiahf/vczjk/pk3;->OooO0OO()Llyiahf/vczjk/pk3;
-
-    move-result-object v2
-
-    invoke-virtual {p2, v2}, Llyiahf/vczjk/pb7;->OooO0O0(Llyiahf/vczjk/pk3;)V
-
-    new-instance v2, Llyiahf/vczjk/d96;
-
-    invoke-direct {v2}, Llyiahf/vczjk/d96;-><init>()V
-
-    new-instance v4, Llyiahf/vczjk/e96;
-
-    invoke-direct {v4, v2}, Llyiahf/vczjk/e96;-><init>(Llyiahf/vczjk/d96;)V
-
-    iput-object v4, p2, Llyiahf/vczjk/pb7;->OooOOO:Ljava/lang/Object;
-
-    invoke-virtual {p2}, Llyiahf/vczjk/pb7;->OooOO0()Llyiahf/vczjk/mi;
-
-    move-result-object p2
-
-    const-class v2, Llyiahf/vczjk/v01;
-
-    invoke-virtual {p2, v2}, Llyiahf/vczjk/mi;->OooO0oO(Ljava/lang/Class;)Ljava/lang/Object;
-
-    move-result-object p2
-
-    const-string v2, "create(...)"
-
-    invoke-static {p2, v2}, Llyiahf/vczjk/v34;->OooOoO0(Ljava/lang/Object;Ljava/lang/String;)V
-
-    check-cast p2, Llyiahf/vczjk/v01;
-
-    iput-object p1, v0, Llyiahf/vczjk/qq7;->L$0:Ljava/lang/Object;
-
-    iput v3, v0, Llyiahf/vczjk/qq7;->label:I
-
-    invoke-interface {p2, p1, v0}, Llyiahf/vczjk/v01;->OooO00o(Ljava/lang/String;Llyiahf/vczjk/yo1;)Ljava/lang/Object;
-
-    move-result-object p2
-
-    if-ne p2, v1, :cond_3
-
-    return-object v1
-
-    :cond_3
-    :goto_1
-    check-cast p2, Lgithub/tornaco/android/thanos/support/subscribe/CommonApiResWrapper;
-
-    const-string v0, "<this>"
-
-    invoke-static {p2, v0}, Llyiahf/vczjk/v34;->OooOoO(Ljava/lang/Object;Ljava/lang/String;)V
-
-    invoke-virtual {p2}, Lgithub/tornaco/android/thanos/support/subscribe/CommonApiResWrapper;->getResult()I
-
-    move-result v0
-
-    const/4 v1, 0x0
-
-    if-nez v0, :cond_4
-
-    move v0, v3
-
-    goto :goto_2
-
-    :cond_4
-    move v0, v1
-
-    :goto_2
-    if-eqz v0, :cond_5
-
-    invoke-virtual {p2}, Lgithub/tornaco/android/thanos/support/subscribe/CommonApiResWrapper;->getK()Ljava/lang/String;
-
-    move-result-object v0
-
-    invoke-static {p1, v0}, Ltornaco/android/sec/net/S;->c(Ljava/lang/String;Ljava/lang/String;)V
-
-    goto :goto_3
-
-    :cond_5
-    const/4 p1, 0x0
-
-    invoke-static {p1}, Llyiahf/vczjk/xl4;->OooO00o(Ljava/lang/String;)V
-
-    :goto_3
-    invoke-virtual {p2}, Lgithub/tornaco/android/thanos/support/subscribe/CommonApiResWrapper;->getResult()I
-
-    move-result p1
-
-    if-nez p1, :cond_6
-
-    goto :goto_4
-
-    :cond_6
-    move v3, v1
-
-    :goto_4
-    if-eqz v3, :cond_7
-
-    sget-object p1, Llyiahf/vczjk/uq7;->OooO0OO:Llyiahf/vczjk/sc9;
-
-    invoke-virtual {p1}, Llyiahf/vczjk/sc9;->getValue()Ljava/lang/Object;
-
-    move-result-object p1
-
-    check-cast p1, Llyiahf/vczjk/nk3;
-
-    invoke-virtual {p2}, Lgithub/tornaco/android/thanos/support/subscribe/CommonApiResWrapper;->getMsg()Ljava/lang/String;
-
-    move-result-object p2
-
-    const-class v0, Lgithub/tornaco/android/thanos/support/subscribe/code/CodeRemaining;
-
-    invoke-virtual {p1, v0, p2}, Llyiahf/vczjk/nk3;->OooO0O0(Ljava/lang/Class;Ljava/lang/String;)Ljava/lang/Object;
-
-    move-result-object p1
-
-    const-string p2, "fromJson(...)"
-
-    invoke-static {p1, p2}, Llyiahf/vczjk/v34;->OooOoO0(Ljava/lang/Object;Ljava/lang/String;)V
-
-    move-object p2, p1
-
-    check-cast p2, Lgithub/tornaco/android/thanos/support/subscribe/code/CodeRemaining;
+    invoke-direct {p2, v0, v1, v2, v3}, Lgithub/tornaco/android/thanos/support/subscribe/code/CodeRemaining;-><init>(JJ)V
 
     sput-object p2, Llyiahf/vczjk/uq7;->OooO0O0:Lgithub/tornaco/android/thanos/support/subscribe/code/CodeRemaining;
 
-    goto :goto_5
+    const-string v0, "VALID_PREMIUM_KEY"
 
-    :cond_7
-    const-string p1, "verify fail"
-
-    new-instance p2, Ljava/lang/IllegalArgumentException;
-
-    invoke-direct {p2, p1}, Ljava/lang/IllegalArgumentException;-><init>(Ljava/lang/String;)V
-
-    throw p2
+    invoke-static {p1, v0}, Ltornaco/android/sec/net/S;->c(Ljava/lang/String;Ljava/lang/String;)V
 
     :cond_8
     :goto_5
