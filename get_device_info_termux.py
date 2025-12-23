@@ -1,25 +1,23 @@
 #!/usr/bin/env python3
 """
-Extractor Automático de Información del Dispositivo
-===================================================
+Extractor de Información del Dispositivo - Versión Termux
+==========================================================
 
-Auto-detecta si está en Termux o PC y usa el método apropiado:
-- En Termux: Usa comandos locales y 'su -c' si hay root
-- En PC: Usa 'adb shell'
+Obtiene la información del dispositivo Android directamente desde Termux
+usando comandos locales y root (su) cuando está disponible.
 
-Requisitos Termux:
-- Python instalado (pkg install python)
-- (Opcional) Root access para más información
-
-Requisitos PC:
-- ADB instalado y en PATH
-- USB Debugging habilitado
-- Dispositivo conectado
+Requisitos:
+- Termux instalado en Android
+- (Opcional) Root access para información adicional
 
 Uso:
-    python3 get_device_info.py
-    python3 get_device_info.py --json       # Salida en JSON
-    python3 get_device_info.py --force-adb  # Forzar modo ADB
+    python get_device_info_termux.py
+    python get_device_info_termux.py --json
+    python get_device_info_termux.py --use-adb  # Forzar modo ADB
+
+Modos de operación:
+1. Termux local (default) - Usa comandos locales y su -c si hay root
+2. ADB mode - Usa adb shell (cuando --use-adb es especificado)
 """
 
 import subprocess
@@ -29,36 +27,19 @@ import os
 from datetime import datetime
 
 
-class DeviceInfoExtractor:
-    """Extrae información del dispositivo - Auto-detecta Termux o ADB"""
+class DeviceInfoExtractorTermux:
+    """Extrae información del dispositivo - Compatible con Termux y ADB"""
     
-    def __init__(self, force_adb=False):
+    def __init__(self, use_adb=False):
         self.device_info = {}
-        self.is_termux = self._detect_termux() and not force_adb
+        self.use_adb = use_adb
         self.has_root = False
         
-        if self.is_termux:
-            self.has_root = self._check_root_access()
+        if not use_adb:
+            self.has_root = self.check_root_access()
     
-    def _detect_termux(self):
-        """Detecta si el script está ejecutándose en Termux"""
-        # Verificar variables de entorno de Termux
-        if os.environ.get('TERMUX_VERSION'):
-            return True
-        
-        # Verificar si existe el directorio de Termux
-        if os.path.exists('/data/data/com.termux'):
-            return True
-        
-        # Verificar si PREFIX apunta a Termux
-        prefix = os.environ.get('PREFIX', '')
-        if 'com.termux' in prefix:
-            return True
-        
-        return False
-    
-    def _check_root_access(self):
-        """Verifica si hay acceso root (solo en Termux)"""
+    def check_root_access(self):
+        """Verifica si hay acceso root"""
         try:
             result = subprocess.run(
                 ["su", "-c", "echo OK"],
@@ -72,22 +53,22 @@ class DeviceInfoExtractor:
     
     def run_command(self, command, need_root=False):
         """
-        Ejecuta comando según el entorno (Termux o ADB)
+        Ejecuta comando según el modo (Termux local o ADB)
         
         Args:
-            command: Comando a ejecutar
+            command: Comando a ejecutar (sin 'su -c' ni 'adb shell')
             need_root: Si requiere root en modo Termux
         """
         try:
-            if self.is_termux:
-                # Modo Termux: ejecutar localmente
+            if self.use_adb:
+                # Modo ADB
+                cmd = ["adb", "shell"] + command.split()
+            else:
+                # Modo Termux local
                 if need_root and self.has_root:
                     cmd = ["su", "-c", command]
                 else:
                     cmd = command.split()
-            else:
-                # Modo ADB: ejecutar via adb shell
-                cmd = ["adb", "shell"] + command.split()
             
             result = subprocess.run(
                 cmd,
@@ -98,51 +79,31 @@ class DeviceInfoExtractor:
             return result.stdout.strip().replace('\r', '')
         except subprocess.TimeoutExpired:
             return "TIMEOUT"
-        except FileNotFoundError:
-            return "COMMAND_NOT_FOUND"
+        except FileNotFoundError as e:
+            if self.use_adb:
+                return "ADB_NOT_FOUND"
+            return f"COMMAND_NOT_FOUND: {e}"
         except Exception as e:
             return f"ERROR: {e}"
-    
-    def run_adb(self, command):
-        """Alias para compatibilidad con código antiguo"""
-        return self.run_command(command)
-    
-    def check_adb_connection(self):
-        """Verifica si hay dispositivo conectado (solo modo ADB)"""
-        if self.is_termux:
-            return True  # En Termux siempre está "conectado"
-        
-        try:
-            result = subprocess.run(
-                ["adb", "devices"],
-                capture_output=True,
-                text=True,
-                timeout=5
-            )
-            lines = result.stdout.strip().split('\n')
-            devices = [l for l in lines[1:] if l.strip().endswith('device')]
-            return len(devices) > 0
-        except:
-            return False
     
     def get_android_id(self):
         """Obtiene ANDROID_ID usando diferentes métodos"""
         # Método 1: settings (funciona sin root)
         result = self.run_command("settings get secure android_id")
-        if result and "ERROR" not in result and "null" not in result and len(result) > 5:
+        if result and "ERROR" not in result and "null" not in result:
             return result
         
-        # Método 2: content query (alternativo)
-        if self.is_termux:
-            result = self.run_command("content query --uri content://settings/secure --where \"name='android_id'\"")
-            if "value=" in result:
-                for part in result.split(","):
-                    if "value=" in part:
-                        return part.split("=")[1].strip()
+        # Método 2: content (alternativo)
+        result = self.run_command("content query --uri content://settings/secure --where \"name='android_id'\"")
+        if "value=" in result:
+            # Parse: Row: 0 _id=X, name=android_id, value=XXXXX
+            for part in result.split(","):
+                if "value=" in part:
+                    return part.split("=")[1].strip()
         
-        # Método 3: getprop como fallback
+        # Método 3: getprop (puede no funcionar en todos los dispositivos)
         result = self.run_command("getprop ro.serialno")
-        if result and "ERROR" not in result and len(result) > 5:
+        if result and "ERROR" not in result:
             return result
         
         return "UNAVAILABLE"
@@ -151,7 +112,7 @@ class DeviceInfoExtractor:
         """Extrae toda la información del dispositivo"""
         print("[*] Extrayendo información del dispositivo...")
         
-        if self.is_termux:
+        if not self.use_adb:
             print(f"[*] Modo: Termux Local (Root: {'✓' if self.has_root else '✗'})")
         else:
             print("[*] Modo: ADB Shell")
@@ -160,7 +121,7 @@ class DeviceInfoExtractor:
         print("[*] Obteniendo Android ID...")
         self.device_info['android_id'] = self.get_android_id()
         
-        # Información del dispositivo
+        # Información del dispositivo (getprop)
         print("[*] Obteniendo propiedades del sistema...")
         self.device_info['manufacturer'] = self.run_command("getprop ro.product.manufacturer")
         self.device_info['model'] = self.run_command("getprop ro.product.model")
@@ -181,12 +142,17 @@ class DeviceInfoExtractor:
         self.device_info['board'] = self.run_command("getprop ro.product.board")
         self.device_info['hardware'] = self.run_command("getprop ro.hardware")
         
-        # Serial number (puede estar restringido)
+        # Serial number
         self.device_info['serial'] = self.run_command("getprop ro.serialno")
         
-        # Info adicional en Termux
-        if self.is_termux:
+        # Información adicional de Termux
+        if not self.use_adb:
+            self.device_info['termux_version'] = self.run_command("termux-info")
+            
+            # Arquitectura
             self.device_info['arch'] = self.run_command("uname -m")
+            
+            # Hostname
             self.device_info['hostname'] = self.run_command("hostname")
         
         return self.device_info
@@ -195,11 +161,11 @@ class DeviceInfoExtractor:
         """Muestra resultados formateados"""
         print("\n" + "=" * 70)
         print("  INFORMACIÓN DEL DISPOSITIVO ANDROID")
-        if self.is_termux:
-            print("  Método: TERMUX LOCAL")
-            print(f"  Root: {'✓ Disponible' if self.has_root else '✗ No disponible'}")
+        if not self.use_adb:
+            print("  Extraído desde: TERMUX LOCAL")
+            print(f"  Root access: {'✓ Disponible' if self.has_root else '✗ No disponible'}")
         else:
-            print("  Método: ADB SHELL")
+            print("  Extraído desde: ADB SHELL")
         print("=" * 70)
         
         print("\n📱 IDENTIFICACIÓN:")
@@ -222,13 +188,24 @@ class DeviceInfoExtractor:
         print(f"   Board:          {self.device_info.get('board', 'N/A')}")
         print(f"   Hardware:       {self.device_info.get('hardware', 'N/A')}")
         
+        if not self.use_adb:
+            print("\n🖥️  TERMUX INFO:")
+            print(f"   Arquitectura:   {self.device_info.get('arch', 'N/A')}")
+            print(f"   Hostname:       {self.device_info.get('hostname', 'N/A')}")
+        
         print("\n" + "=" * 70)
         print("  PARA EL GENERADOR INTERACTIVO DE LICENCIAS")
         print("=" * 70)
         print("\nCopia estos valores al ejecutar:")
-        print("  python3 interactive_license_generator.py\n")
+        print("  python interactive_license_generator.py\n")
         
-        print(f"  Device ID:   {self.device_info.get('android_id', 'N/A')}")
+        android_id = self.device_info.get('android_id', 'N/A')
+        if android_id == 'UNAVAILABLE':
+            print("  ⚠️  ANDROID_ID no disponible. Usando alternativas:")
+            print(f"  Device ID:   {self.device_info.get('serial', 'GENERATE_RANDOM')}")
+        else:
+            print(f"  Device ID:   {android_id}")
+        
         print(f"  Modelo:      {self.device_info.get('model', 'N/A')}")
         print(f"  Build ID:    {self.device_info.get('build_id', 'N/A')}")
         print(f"  API Level:   {self.device_info.get('sdk_int', 'N/A')}")
@@ -243,9 +220,11 @@ class DeviceInfoExtractor:
         # Añadir metadata
         export_data = {
             "extracted_at": datetime.now().isoformat(),
+            "extraction_method": "termux_local" if not self.use_adb else "adb_shell",
+            "root_access": self.has_root if not self.use_adb else None,
             "device_info": self.device_info,
             "for_license_generator": {
-                "device_id": self.device_info.get('android_id', ''),
+                "device_id": self.device_info.get('android_id', self.device_info.get('serial', '')),
                 "device_model": self.device_info.get('model', ''),
                 "os_name": self.device_info.get('build_id', ''),
                 "os_version": int(self.device_info.get('sdk_int', 0)) if self.device_info.get('sdk_int', '0').isdigit() else 0
@@ -259,34 +238,95 @@ class DeviceInfoExtractor:
         return filename
 
 
+def print_help():
+    """Muestra ayuda del script"""
+    print("""
+Uso: python get_device_info_termux.py [opciones]
+
+Opciones:
+  --help, -h       Muestra esta ayuda
+  --json           Exporta resultado a JSON
+  --use-adb        Usa ADB en lugar de comandos locales de Termux
+  
+Modos de operación:
+  1. Termux Local (default):
+     - Ejecuta comandos directamente en el dispositivo
+     - Usa 'su -c' para comandos que requieren root
+     - No requiere PC ni cable USB
+     
+  2. ADB Mode (--use-adb):
+     - Usa 'adb shell' desde PC
+     - Requiere USB debugging habilitado
+     - Compatible con script original
+
+Ejemplos:
+  # Desde Termux en el dispositivo
+  python get_device_info_termux.py
+  
+  # Exportar a JSON
+  python get_device_info_termux.py --json
+  
+  # Usar ADB desde PC
+  python get_device_info_termux.py --use-adb
+  
+Requisitos Termux:
+  pkg install python
+  pkg install termux-api (opcional, para funciones adicionales)
+  
+Para root:
+  - Dispositivo rooteado
+  - Magisk o SuperSU instalado
+  - Otorgar permisos root a Termux
+""")
+
+
 def main():
     """Función principal"""
+    # Verificar argumentos
+    if '--help' in sys.argv or '-h' in sys.argv:
+        print_help()
+        sys.exit(0)
+    
+    output_json = '--json' in sys.argv
+    use_adb = '--use-adb' in sys.argv
+    
     print("\n" + "=" * 70)
     print("  EXTRACTOR DE INFORMACIÓN DEL DISPOSITIVO")
-    print("  Para uso con Generador de Licencias Thanos Android")
+    if not use_adb:
+        print("  Modo: TERMUX LOCAL")
+        print("  Compatible con Android sin PC")
+    else:
+        print("  Modo: ADB SHELL")
+        print("  Requiere PC y USB debugging")
     print("=" * 70)
     print()
     
-    # Verificar argumentos
-    output_json = '--json' in sys.argv
-    
     # Crear extractor
-    extractor = DeviceInfoExtractor()
+    extractor = DeviceInfoExtractorTermux(use_adb=use_adb)
     
-    # Verificar conexión ADB
-    print("[*] Verificando conexión ADB...")
-    if not extractor.check_adb_connection():
-        print("\n❌ ERROR: No se detectó ningún dispositivo Android\n")
-        print("Asegúrate de:")
-        print("  1. Tener ADB instalado (https://developer.android.com/studio/command-line/adb)")
-        print("  2. USB Debugging habilitado en el dispositivo")
-        print("  3. Dispositivo conectado por USB")
-        print("  4. Haber aceptado el prompt de USB Debugging")
-        print("\nPara verificar conexión: adb devices")
-        print()
-        sys.exit(1)
-    
-    print("✓ Dispositivo Android detectado\n")
+    # Si es modo ADB, verificar conexión
+    if use_adb:
+        print("[*] Verificando conexión ADB...")
+        try:
+            result = subprocess.run(
+                ["adb", "devices"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            if "device" not in result.stdout:
+                print("\n❌ ERROR: No se detectó dispositivo Android via ADB\n")
+                print("Asegúrate de:")
+                print("  1. Tener ADB instalado")
+                print("  2. USB Debugging habilitado")
+                print("  3. Dispositivo conectado por USB")
+                print("\nO usa modo Termux local sin --use-adb")
+                sys.exit(1)
+            print("✓ Dispositivo Android detectado via ADB\n")
+        except FileNotFoundError:
+            print("\n❌ ERROR: ADB no encontrado\n")
+            print("Instala ADB o usa modo Termux local sin --use-adb")
+            sys.exit(1)
     
     # Extraer información
     try:
@@ -299,10 +339,18 @@ def main():
         if output_json:
             extractor.export_json()
         
-        # Sugerencia
-        print("\n💡 SIGUIENTE PASO:")
-        print("   Ejecuta: python3 interactive_license_generator.py")
-        print("   E ingresa los valores mostrados arriba\n")
+        # Sugerencias
+        print("\n💡 PRÓXIMOS PASOS:")
+        if not use_adb:
+            print("   1. Copia los valores mostrados arriba")
+            print("   2. Ejecuta: python interactive_license_generator.py")
+            print("   3. Ingresa los valores cuando se soliciten")
+            print("\n   💡 TIP: Si Android ID no está disponible, el generador")
+            print("            puede crear uno aleatorio o usar el serial number")
+        else:
+            print("   Ejecuta: python interactive_license_generator.py")
+            print("   E ingresa los valores mostrados arriba")
+        print()
         
     except KeyboardInterrupt:
         print("\n\n❌ Extracción cancelada por el usuario")

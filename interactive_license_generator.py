@@ -25,6 +25,7 @@ import json
 import hashlib
 import hmac
 import uuid as uuid_lib
+import subprocess
 from datetime import datetime, timedelta
 from typing import Dict, Optional
 
@@ -56,6 +57,104 @@ class InteractiveLicenseGenerator:
             'algorithm': 'sha256',
             'custom_salt': ''
         }
+        self.is_termux = self._detect_termux()
+        self.has_root = False
+        
+        if self.is_termux:
+            self.has_root = self._check_root_access()
+    
+    def _detect_termux(self):
+        """Detecta si está ejecutándose en Termux"""
+        if os.environ.get('TERMUX_VERSION'):
+            return True
+        if os.path.exists('/data/data/com.termux'):
+            return True
+        prefix = os.environ.get('PREFIX', '')
+        if 'com.termux' in prefix:
+            return True
+        return False
+    
+    def _check_root_access(self):
+        """Verifica si hay acceso root"""
+        try:
+            result = subprocess.run(
+                ["su", "-c", "echo OK"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            return "OK" in result.stdout
+        except:
+            return False
+    
+    def _run_command(self, command):
+        """Ejecuta comando con su -c si hay root, sino normal"""
+        try:
+            if self.has_root:
+                cmd = ["su", "-c", command]
+            else:
+                cmd = command.split()
+            
+            result = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=10
+            )
+            return result.stdout.strip().replace('\r', '')
+        except Exception as e:
+            return f"ERROR: {e}"
+    
+    def _get_android_id_auto(self):
+        """Obtiene Android ID automáticamente"""
+        # Método 1: settings
+        result = self._run_command("settings get secure android_id")
+        if result and "ERROR" not in result and "null" not in result and len(result) > 5:
+            return result
+        
+        # Método 2: content query
+        result = self._run_command("content query --uri content://settings/secure --where \"name='android_id'\"")
+        if "value=" in result:
+            for part in result.split(","):
+                if "value=" in part:
+                    return part.split("=")[1].strip()
+        
+        # Método 3: getprop
+        result = self._run_command("getprop ro.serialno")
+        if result and "ERROR" not in result and len(result) > 5:
+            return result
+        
+        return None
+    
+    def _auto_extract_device_info(self):
+        """Extrae automáticamente información del dispositivo"""
+        print("\n🔍 EXTRAYENDO INFORMACIÓN AUTOMÁTICAMENTE...")
+        print("-" * 70)
+        
+        info = {}
+        
+        # Android ID
+        print("[*] Obteniendo Android ID...")
+        info['android_id'] = self._get_android_id_auto()
+        
+        # Modelo
+        print("[*] Obteniendo modelo del dispositivo...")
+        info['model'] = self._run_command("getprop ro.product.model")
+        
+        # Build ID
+        print("[*] Obteniendo Build ID...")
+        info['build_id'] = self._run_command("getprop ro.build.id")
+        
+        # API Level
+        print("[*] Obteniendo API Level...")
+        info['sdk_int'] = self._run_command("getprop ro.build.version.sdk")
+        
+        # Manufacturer y brand (info adicional)
+        info['manufacturer'] = self._run_command("getprop ro.product.manufacturer")
+        info['brand'] = self._run_command("getprop ro.product.brand")
+        
+        print("\n✓ Extracción completada")
+        return info
     
     def print_header(self):
         """Muestra encabezado del generador"""
@@ -69,64 +168,173 @@ class InteractiveLicenseGenerator:
         print("\n📱 INFORMACIÓN DEL DISPOSITIVO")
         print("-" * 70)
         
-        # UUID
-        print("\n1. UUID del dispositivo:")
-        print("   El UUID se genera automáticamente o puedes usar uno específico.")
-        choice = input("   ¿Usar UUID aleatorio? (s/n) [s]: ").strip().lower()
+        # Detectar si está en Termux con root
+        auto_extract = False
+        if self.is_termux:
+            print(f"\n🤖 Detectado: Termux en Android")
+            print(f"   Root access: {'✓ Disponible' if self.has_root else '✗ No disponible'}")
+            
+            if self.has_root:
+                print("\n💡 Puedo obtener la información automáticamente usando root.")
+                choice = input("   ¿Deseas extracción automática? (s/n) [s]: ").strip().lower()
+                auto_extract = choice != 'n' and choice != 'no'
+            else:
+                print("\n💡 Sin root, puedo intentar obtener algunos valores.")
+                choice = input("   ¿Intentar extracción automática? (s/n) [n]: ").strip().lower()
+                auto_extract = choice == 's' or choice == 'si'
         
-        if choice == 'n' or choice == 'no':
-            uuid_input = input("   Ingresa UUID (formato: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx): ").strip()
-            try:
-                # Validar formato UUID
-                uuid_lib.UUID(uuid_input)
-                self.config['uuid'] = uuid_input
-            except ValueError:
-                print("   ⚠️  UUID inválido, usando uno aleatorio")
-                self.config['uuid'] = str(uuid_lib.uuid4())
-        else:
+        # Extracción automática
+        if auto_extract:
+            auto_info = self._auto_extract_device_info()
+            
+            print("\n📋 INFORMACIÓN OBTENIDA:")
+            print("-" * 70)
+            
+            if auto_info.get('android_id'):
+                print(f"   Device ID:   {auto_info['android_id']}")
+                self.config['device_id'] = auto_info['android_id']
+            else:
+                print("   Device ID:   ⚠️  No disponible (se generará aleatorio)")
+                self.config['device_id'] = self._generate_device_id()
+            
+            if auto_info.get('model'):
+                print(f"   Modelo:      {auto_info['model']}")
+                self.config['device_model'] = auto_info['model']
+            
+            if auto_info.get('build_id'):
+                print(f"   Build ID:    {auto_info['build_id']}")
+                self.config['os_name'] = auto_info['build_id']
+            
+            if auto_info.get('sdk_int'):
+                print(f"   API Level:   {auto_info['sdk_int']}")
+                try:
+                    self.config['os_version'] = int(auto_info['sdk_int'])
+                except:
+                    self.config['os_version'] = 29
+            
+            if auto_info.get('manufacturer') and auto_info.get('brand'):
+                print(f"   Info:        {auto_info['manufacturer']} - {auto_info['brand']}")
+            
+            print("\n✓ Usando valores extraídos automáticamente")
+            
+            # UUID siempre aleatorio
             self.config['uuid'] = str(uuid_lib.uuid4())
+            print(f"   UUID:        {self.config['uuid']} (generado)")
+            
+            # Preguntar si desea editar algo
+            print("\n¿Deseas modificar algún valor? (s/n) [n]: ", end="")
+            if input().strip().lower() in ['s', 'si']:
+                self._manual_input_device_info()
+            
+            return
         
-        print(f"   ✓ UUID: {self.config['uuid']}")
+        # Entrada manual
+        print("\n⌨️  ENTRADA MANUAL DE VALORES")
+        self._manual_input_device_info()
+    
+    def _manual_input_device_info(self):
+        """Entrada manual de información del dispositivo"""
+    def _manual_input_device_info(self):
+        """Entrada manual de información del dispositivo"""
+        print()
+        
+        # UUID
+        if not self.config.get('uuid'):
+            print("1. UUID del dispositivo:")
+            print("   El UUID se genera automáticamente o puedes usar uno específico.")
+            choice = input("   ¿Usar UUID aleatorio? (s/n) [s]: ").strip().lower()
+            
+            if choice == 'n' or choice == 'no':
+                uuid_input = input("   Ingresa UUID (formato: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx): ").strip()
+                try:
+                    uuid_lib.UUID(uuid_input)
+                    self.config['uuid'] = uuid_input
+                except ValueError:
+                    print("   ⚠️  UUID inválido, usando uno aleatorio")
+                    self.config['uuid'] = str(uuid_lib.uuid4())
+            else:
+                self.config['uuid'] = str(uuid_lib.uuid4())
+            
+            print(f"   ✓ UUID: {self.config['uuid']}")
         
         # Device ID (ANDROID_ID)
-        print("\n2. Device ID (ANDROID_ID):")
-        print("   Típicamente es un número hexadecimal de 16 caracteres")
-        print("   Ejemplo: 9774d56d682e549c")
-        choice = input("   ¿Usar Device ID aleatorio? (s/n) [s]: ").strip().lower()
-        
-        if choice == 'n' or choice == 'no':
-            device_id = input("   Ingresa Device ID: ").strip()
-            if device_id:
-                self.config['device_id'] = device_id
+        if not self.config.get('device_id'):
+            print("\n2. Device ID (ANDROID_ID):")
+            print("   Típicamente es un número hexadecimal de 16 caracteres")
+            print("   Ejemplo: 9774d56d682e549c")
+            choice = input("   ¿Usar Device ID aleatorio? (s/n) [s]: ").strip().lower()
+            
+            if choice == 'n' or choice == 'no':
+                device_id = input("   Ingresa Device ID: ").strip()
+                if device_id:
+                    self.config['device_id'] = device_id
+                else:
+                    self.config['device_id'] = self._generate_device_id()
             else:
                 self.config['device_id'] = self._generate_device_id()
+            
+            print(f"   ✓ Device ID: {self.config['device_id']}")
         else:
-            self.config['device_id'] = self._generate_device_id()
-        
-        print(f"   ✓ Device ID: {self.config['device_id']}")
+            # Ya tiene valor de extracción automática
+            print(f"\n2. Device ID: {self.config['device_id']}")
+            change = input("   ¿Cambiar? (s/n) [n]: ").strip().lower()
+            if change in ['s', 'si']:
+                device_id = input("   Nuevo Device ID: ").strip()
+                if device_id:
+                    self.config['device_id'] = device_id
         
         # Modelo del dispositivo
-        print("\n3. Modelo del dispositivo:")
-        print("   Ejemplos: SM-G950F (Galaxy S8), Pixel 6, OnePlus 9 Pro")
-        model = input("   Ingresa modelo [SM-G950F]: ").strip()
-        self.config['device_model'] = model if model else "SM-G950F"
+        if not self.config.get('device_model'):
+            print("\n3. Modelo del dispositivo:")
+            print("   Ejemplos: SM-G950F (Galaxy S8), Pixel 6, OnePlus 9 Pro")
+            model = input("   Ingresa modelo [SM-G950F]: ").strip()
+            self.config['device_model'] = model if model else "SM-G950F"
+        else:
+            print(f"\n3. Modelo: {self.config['device_model']}")
+            change = input("   ¿Cambiar? (s/n) [n]: ").strip().lower()
+            if change in ['s', 'si']:
+                model = input("   Nuevo modelo: ").strip()
+                if model:
+                    self.config['device_model'] = model
+        
         print(f"   ✓ Modelo: {self.config['device_model']}")
         
         # OS Name (Build ID)
-        print("\n4. Build ID del sistema:")
-        print("   Ejemplo: QP1A.190711.020 (Android 10)")
-        os_name = input("   Ingresa Build ID [QP1A.190711.020]: ").strip()
-        self.config['os_name'] = os_name if os_name else "QP1A.190711.020"
+        if not self.config.get('os_name'):
+            print("\n4. Build ID del sistema:")
+            print("   Ejemplo: QP1A.190711.020 (Android 10)")
+            os_name = input("   Ingresa Build ID [QP1A.190711.020]: ").strip()
+            self.config['os_name'] = os_name if os_name else "QP1A.190711.020"
+        else:
+            print(f"\n4. Build ID: {self.config['os_name']}")
+            change = input("   ¿Cambiar? (s/n) [n]: ").strip().lower()
+            if change in ['s', 'si']:
+                os_name = input("   Nuevo Build ID: ").strip()
+                if os_name:
+                    self.config['os_name'] = os_name
+        
         print(f"   ✓ Build ID: {self.config['os_name']}")
         
         # OS Version (SDK INT)
-        print("\n5. Versión de Android (API Level):")
-        print("   Android 10 = 29, Android 11 = 30, Android 12 = 31, etc.")
-        try:
-            os_version = input("   Ingresa API Level [29]: ").strip()
-            self.config['os_version'] = int(os_version) if os_version else 29
-        except ValueError:
-            self.config['os_version'] = 29
+        if not self.config.get('os_version') or self.config['os_version'] == 0:
+            print("\n5. Versión de Android (API Level):")
+            print("   Android 10 = 29, Android 11 = 30, Android 12 = 31, etc.")
+            try:
+                os_version = input("   Ingresa API Level [29]: ").strip()
+                self.config['os_version'] = int(os_version) if os_version else 29
+            except ValueError:
+                self.config['os_version'] = 29
+        else:
+            print(f"\n5. API Level: {self.config['os_version']}")
+            change = input("   ¿Cambiar? (s/n) [n]: ").strip().lower()
+            if change in ['s', 'si']:
+                try:
+                    os_version = input("   Nuevo API Level: ").strip()
+                    if os_version:
+                        self.config['os_version'] = int(os_version)
+                except ValueError:
+                    print("   ⚠️  Valor inválido, manteniendo actual")
+        
         print(f"   ✓ API Level: {self.config['os_version']}")
     
     def _generate_device_id(self):
