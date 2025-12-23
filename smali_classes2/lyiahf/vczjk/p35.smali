@@ -40,6 +40,8 @@
 
     sget-object v4, Llyiahf/vczjk/q7a;->OooO00o:Llyiahf/vczjk/q7a;
 
+    const/4 v0, 0x1
+
     invoke-direct {v3, v0, v1, v4, v4}, Llyiahf/vczjk/g99;-><init>(ZLlyiahf/vczjk/f99;Llyiahf/vczjk/r7a;Llyiahf/vczjk/r7a;)V
 
     return-object v3

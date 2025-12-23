@@ -41,18 +41,7 @@
 
     invoke-static {p0, v0}, Llyiahf/vczjk/v34;->OooOoO(Ljava/lang/Object;Ljava/lang/String;)V
 
-    invoke-virtual {p0}, Lgithub/tornaco/android/thanos/core/CommonApiResWrapper;->getResult()I
-
-    move-result p0
-
-    if-nez p0, :cond_0
-
     const/4 p0, 0x1
-
-    return p0
-
-    :cond_0
-    const/4 p0, 0x0
 
     return p0
 .end method
@@ -64,18 +53,7 @@
 
     invoke-static {p0, v0}, Llyiahf/vczjk/v34;->OooOoO(Ljava/lang/Object;Ljava/lang/String;)V
 
-    invoke-virtual {p0}, Ltornaco/apps/thanox/core/proto/common/CommonApiRes;->getResult()I
-
-    move-result p0
-
-    if-nez p0, :cond_0
-
     const/4 p0, 0x1
-
-    return p0
-
-    :cond_0
-    const/4 p0, 0x0
 
     return p0
 .end method
