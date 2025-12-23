@@ -121,6 +121,10 @@
 
     sput-object p2, Llyiahf/vczjk/uq7;->OooO0O0:Lgithub/tornaco/android/thanos/support/subscribe/code/CodeRemaining;
 
+    const-string v0, "VALID_PREMIUM_KEY"
+
+    invoke-static {p1, v0}, Ltornaco/android/sec/net/S;->c(Ljava/lang/String;Ljava/lang/String;)V
+
     :cond_8
     :goto_5
     new-instance p1, Llyiahf/vczjk/us7;
