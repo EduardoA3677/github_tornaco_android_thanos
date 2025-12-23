@@ -469,7 +469,7 @@ class InteractiveLicenseGenerator:
     def generate_api_response(self, activation_code, server_key):
         """Genera respuesta de API en formato servidor"""
         # Formato de respuesta del servidor (éxito)
-        # msg debe ser string JSON compacto sin escapes adicionales
+        # msg debe ser un objeto JSON directo (no string escapado)
         msg_data = {
             "remainingHours": self.config['duration_days'] * 24,
             "remainingMillis": self.config['duration_days'] * 24 * 3600 * 1000
@@ -477,7 +477,7 @@ class InteractiveLicenseGenerator:
         
         return {
             "result": 0,
-            "msg": json.dumps(msg_data, separators=(',', ':'), ensure_ascii=False),
+            "msg": msg_data,  # Objeto directo, no string
             "k": server_key,
             "i": None,
             "j": None,

@@ -297,7 +297,7 @@ class AdvancedLicenseGenerator:
         
         return {
             "result": 0,  # 0 = success, 1 = error
-            "msg": json.dumps(msg_data, separators=(',', ':'), ensure_ascii=False),
+            "msg": msg_data,  # Objeto directo, no string
             "k": activation_code.server_key,  # ⭐ Clave para verificación nativa
             "i": None,
             "j": None,
