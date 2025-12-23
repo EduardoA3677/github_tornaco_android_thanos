@@ -480,7 +480,7 @@
 
     new-instance p1, Llyiahf/vczjk/cm4;
 
-    invoke-direct {p1, v10, v7, v6}, Llyiahf/vczjk/cm4;-><init>(Ljava/lang/String;ZZ)V
+    invoke-direct {p1, v10, v6, v6}, Llyiahf/vczjk/cm4;-><init>(Ljava/lang/String;ZZ)V
 
     return-object p1
 
