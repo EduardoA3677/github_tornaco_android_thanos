@@ -149,7 +149,7 @@
 
     const/4 v7, 0x0
 
-    invoke-direct {v5, v7, v6, v0}, Llyiahf/vczjk/cm4;-><init>(Ljava/lang/String;ZZ)V
+    invoke-direct {v5, v7, v0, v0}, Llyiahf/vczjk/cm4;-><init>(Ljava/lang/String;ZZ)V
 
     invoke-direct {p1, v5}, Llyiahf/vczjk/am4;-><init>(Llyiahf/vczjk/cm4;)V
 

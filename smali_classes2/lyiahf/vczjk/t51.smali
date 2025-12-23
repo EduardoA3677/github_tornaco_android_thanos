@@ -3923,9 +3923,9 @@
 
     iget-boolean v6, v2, Llyiahf/vczjk/cm4;->OooO00o:Z
 
-    if-nez v6, :cond_11
+    if-eqz v6, :cond_11
 
-    sget v6, Lgithub/tornaco/android/thanos/res/R$string;->badge_trying_app:I
+    sget v6, Lgithub/tornaco/android/thanos/res/R$string;->badge_paid_app:I
 
     invoke-static {v6, v0}, Llyiahf/vczjk/vt6;->Oooo0(ILlyiahf/vczjk/rf1;)Ljava/lang/String;
 
