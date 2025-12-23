@@ -1,0 +1,34 @@
+{
+  "activation_code": {
+    "code": "823C-F86C-6A75-5C45-4DCB-E60A",
+    "flavor": "yearly",
+    "duration_days": 365,
+    "created_at": "2025-12-23T15:19:06.865003",
+    "expires_at": "2026-12-23T15:19:06.865003",
+    "device_binding": {
+      "uuid": "6a2eea6a-2bcd-4e30-bf10-657885eeeaaa",
+      "device_id": "309456de21194116",
+      "device_model": "SM-G950F",
+      "os_name": "QP1A.190711.020",
+      "os_version": 29
+    }
+  },
+  "binding": {
+    "success": true,
+    "code": "823C-F86C-6A75-5C45-4DCB-E60A",
+    "device": {
+      "uuid": "6a2eea6a-2bcd-4e30-bf10-657885eeeaaa",
+      "deviceId": "309456de21194116",
+      "deviceModel": "SM-G950F",
+      "osName": "QP1A.190711.020",
+      "osVersion": 29
+    },
+    "subscription": {
+      "isSubscribed": true,
+      "flavor": "yearly",
+      "remainingHours": 8760,
+      "remainingMillis": 31536000000,
+      "expiresAt": "2026-12-23T15:19:06.865003"
+    }
+  }
+}
