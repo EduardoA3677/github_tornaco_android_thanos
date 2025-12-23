@@ -1,0 +1,44 @@
+{
+  "activation_code": {
+    "code": "200B-8534-2D5F-0EA2-C4FA-BB0C",
+    "flavor": "monthly",
+    "duration_days": 30,
+    "created_at": "2025-12-23T15:27:05.534410",
+    "expires_at": "2026-01-22T15:27:05.534410",
+    "server_key": "dca3ae72d3c7986b01f29293765cc7ab8da866a0b3e82a19d866c56b91c2cf65",
+    "device_binding": {
+      "uuid": "cfba0a73-bc54-4e03-a808-b5f024655810",
+      "device_id": "3cdb5c16bc781def",
+      "device_model": "SM-G950F",
+      "os_name": "QP1A.190711.020",
+      "os_version": 29
+    }
+  },
+  "api_response": {
+    "result": 0,
+    "k": "dca3ae72d3c7986b01f29293765cc7ab8da866a0b3e82a19d866c56b91c2cf65",
+    "msg": "{\"remainingHours\": 720, \"remainingMillis\": 2592000000}"
+  },
+  "binding": {
+    "success": true,
+    "code": "200B-8534-2D5F-0EA2-C4FA-BB0C",
+    "serverKey": "dca3ae72d3c7986b01f29293765cc7ab8da866a0b3e82a19d866c56b91c2cf65",
+    "device": {
+      "uuid": "cfba0a73-bc54-4e03-a808-b5f024655810",
+      "deviceId": "3cdb5c16bc781def",
+      "deviceModel": "SM-G950F",
+      "osName": "QP1A.190711.020",
+      "osVersion": 29
+    },
+    "subscription": {
+      "isSubscribed": true,
+      "flavor": "monthly",
+      "remainingHours": 720,
+      "remainingMillis": 2592000000,
+      "expiresAt": "2026-01-22T15:27:05.534410"
+    },
+    "nativeVerification": {
+      "willPass": true
+    }
+  }
+}
