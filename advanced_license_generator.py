@@ -299,7 +299,7 @@ class AdvancedLicenseGenerator:
             "result": 0,  # 0 = success, 1 = error
             "msg": msg_data,  # Objeto directo, no string
             "k": activation_code.server_key,  # ⭐ Clave para verificación nativa
-            "i": None,
+            "i": activation_code.code,  # ⭐ REQUERIDO: código de activación
             "j": None,
             "l": None,
             "m": None

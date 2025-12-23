@@ -479,7 +479,7 @@ class InteractiveLicenseGenerator:
             "result": 0,
             "msg": msg_data,  # Objeto directo, no string
             "k": server_key,
-            "i": None,
+            "i": activation_code,  # ⭐ REQUERIDO: código de activación
             "j": None,
             "l": None,
             "m": None
